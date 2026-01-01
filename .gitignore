@@ -1,1 +1,2 @@
-.envgit add .gitignore
+.env
+node_modules

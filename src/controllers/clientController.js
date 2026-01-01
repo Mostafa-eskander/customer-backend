@@ -1,12 +1,12 @@
 const Client = require('../models/Client');
 
 exports.createClient = async (req, res) => {
-  const client = await Client.create(req.body);
+  const client = await Client.create({ ...req.body, user: req.user.id });
   res.status(201).json(client);
 };
 
 exports.getClients = async (req, res) => {
-  const clients = await Client.find();
+  const clients = await Client.find({ user: req.user.id });
   res.json(clients);
 };
 
