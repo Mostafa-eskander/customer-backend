@@ -14,8 +14,17 @@ exports.getAllTransactions = async (req, res) => {
 
 exports.createTransaction = async (req, res) => {
   try {
-    // نربط المعاملة بالعميل المسجل دخول
-    const transaction = await Transaction.create({ ...req.body, client: req.user.id });
+    // خد فقط الحقول المطلوبة من body
+    const { type, amount, description } = req.body;
+
+    // ربط المعاملة بالعميل المسجل دخول فقط
+    const transaction = await Transaction.create({
+      type,
+      amount,
+      description,
+      client: req.user.id
+    });
+
     res.status(201).json(transaction);
   } catch (error) {
     res.status(500).json({ message: error.message });
