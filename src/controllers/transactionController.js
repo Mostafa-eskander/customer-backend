@@ -1,66 +1,62 @@
 const Transaction = require('../models/Transaction');
+const Client = require('../models/Client');
 
-// فقط المعاملات الخاصة بالعميل المسجّل دخول
-exports.getAllTransactions = async (req, res) => {
-  try {
-    const userId = req.user.id; // معرف العميل من التوكن
-    const transactions = await Transaction.find({ client: userId })
-      .populate('client', 'name email');
-    res.json(transactions);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
+// 🟢 إنشاء معاملة (آمن)
 exports.createTransaction = async (req, res) => {
   try {
-    // خد فقط الحقول المطلوبة من body
-    const { type, amount, description,name } = req.body;
+    const { type, amount, description, client } = req.body;
 
-    // ربط المعاملة بالعميل المسجل دخول فقط
+    // تأكد إن العميل تابع لنفس اليوزر
+    const foundClient = await Client.findOne({
+      _id: client,
+      user: req.user.id
+    });
+
+    if (!foundClient) {
+      return res.status(403).json({ message: 'عميل غير مسموح' });
+    }
+
     const transaction = await Transaction.create({
       type,
       amount,
       description,
-      name,
-      client: req.user.id
+      client,
+      user: req.user.id
     });
+
     res.status(201).json(transaction);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-exports.getTransactionsByClient = async (req, res) => {
+
+// 🟢 جلب كل المعاملات (صاحب الحساب فقط)
+exports.getAllTransactions = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const transactions = await Transaction.find({
+      user: req.user.id
+    }).populate('client', 'name');
 
-    // بدل السطر القديم:
-    // if (req.params.clientId !== userId) { ... }
-
-    // استخدم السطر الجديد للتحويل لـ string:
-    if (req.params.clientId !== userId.toString()) {
-      return res.status(403).json({ message: 'غير مصرح لك بالوصول لهذه المعاملات' });
-    }
-
-    const transactions = await Transaction.find({ client: userId });
     res.json(transactions);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
+
+// 🟢 تعديل معاملة
 exports.updateTransaction = async (req, res) => {
   try {
-    const userId = req.user.id;
     const transaction = await Transaction.findOneAndUpdate(
-      { _id: req.params.id, client: userId }, // فقط المعاملات الخاصة بالعميل
+      { _id: req.params.id, user: req.user.id },
       req.body,
       { new: true }
     );
 
     if (!transaction) {
-      return res.status(404).json({ message: 'المعاملة غير موجودة أو غير مصرح لك بتعديلها' });
+      return res.status(404).json({ message: 'غير مصرح أو غير موجود' });
     }
 
     res.json(transaction);
@@ -69,16 +65,20 @@ exports.updateTransaction = async (req, res) => {
   }
 };
 
+
+// 🟢 حذف معاملة
 exports.deleteTransaction = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const transaction = await Transaction.findOneAndDelete({ _id: req.params.id, client: userId });
+    const transaction = await Transaction.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user.id
+    });
 
     if (!transaction) {
-      return res.status(404).json({ message: 'المعاملة غير موجودة أو غير مصرح لك بحذفها' });
+      return res.status(404).json({ message: 'غير مصرح أو غير موجود' });
     }
 
-    res.json({ message: 'تم حذف المعاملة بنجاح' });
+    res.json({ message: 'تم حذف المعاملة' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
