@@ -44,7 +44,23 @@ exports.getAllTransactions = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// get by id
+exports.getTransactionById = async (req, res) => {
+  try {
+    const transaction = await Transaction.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    }).populate('client', 'name');
 
+    if (!transaction) {
+      return res.status(404).json({ message: 'المعاملة غير موجودة أو غير مصرح بها' });
+    }
+
+    res.json(transaction);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // 🟢 تعديل معاملة
 exports.updateTransaction = async (req, res) => {
