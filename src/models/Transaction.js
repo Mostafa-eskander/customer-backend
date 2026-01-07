@@ -6,10 +6,20 @@ const transactionSchema = new mongoose.Schema({
     enum: ['دخل', 'مصروف'],
     required: true
   },
-  amount: {
+  quantity: {
     type: Number,
-    required: true
+    required: true,
+    min: 1
   },
+  price: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  total: {
+    type: Number
+  },
+
   description: String,
 
   // العميل
@@ -27,5 +37,10 @@ const transactionSchema = new mongoose.Schema({
   }
 
 }, { timestamps: true });
+
+transactionSchema.pre('save', function(next) {
+  this.total = this.quantity * this.price;
+  next();
+});
 
 module.exports = mongoose.model('Transaction', transactionSchema);

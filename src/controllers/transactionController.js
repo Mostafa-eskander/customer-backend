@@ -5,21 +5,15 @@ const Client = require('../models/Client');
 // 🟢 إنشاء معاملة (آمن)
 exports.createTransaction = async (req, res) => {
   try {
-    const { type, amount, description, client } = req.body;
+    const { type, quantity, price, description, client } = req.body;
 
-    // تأكد إن العميل تابع لنفس اليوزر
-    const foundClient = await Client.findOne({
-      _id: client,
-      user: req.user.id
-    });
-
-    if (!foundClient) {
-      return res.status(403).json({ message: 'عميل غير مسموح' });
-    }
+    const foundClient = await Client.findOne({ _id: client, user: req.user.id });
+    if (!foundClient) return res.status(403).json({ message: 'عميل غير مسموح' });
 
     const transaction = await Transaction.create({
       type,
-      amount,
+      quantity,
+      price,
       description,
       client,
       user: req.user.id
@@ -65,22 +59,24 @@ exports.getTransactionById = async (req, res) => {
 // 🟢 تعديل معاملة
 exports.updateTransaction = async (req, res) => {
   try {
+    const { quantity, price } = req.body;
+
+    // إعادة حساب total
+    if (quantity && price) req.body.total = quantity * price;
+
     const transaction = await Transaction.findOneAndUpdate(
       { _id: req.params.id, user: req.user.id },
       req.body,
       { new: true }
     );
 
-    if (!transaction) {
-      return res.status(404).json({ message: 'غير مصرح أو غير موجود' });
-    }
+    if (!transaction) return res.status(404).json({ message: 'غير مصرح أو غير موجود' });
 
     res.json(transaction);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // 🟢 حذف معاملة
 exports.deleteTransaction = async (req, res) => {
