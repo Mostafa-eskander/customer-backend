@@ -24,3 +24,16 @@ exports.deleteClient = async (req, res) => {
   await Client.findByIdAndDelete(req.params.id);
   res.json({ message: 'Client deleted' });
 };
+
+exports.deleteAllClients = async (req, res) => {
+  try {
+    // حذف جميع المعاملات الخاصة بالمستخدم
+    await Transaction.deleteMany({ user: req.user.id });
+    // حذف جميع العملاء الخاصة بالمستخدم
+    await Client.deleteMany({ user: req.user.id });
+
+    res.json({ message: 'تم حذف جميع العملاء وجميع معاملاتهم' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
