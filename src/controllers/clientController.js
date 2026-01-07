@@ -1,4 +1,5 @@
 const Client = require('../models/Client');
+const Transaction = require('../models/Transaction');
 
 exports.createClient = async (req, res) => {
   const client = await Client.create({ ...req.body, user: req.user.id });

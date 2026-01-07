@@ -5,7 +5,7 @@ const {
   getClientById,
   updateClient,
   deleteClient,
-  deleteAllClients
+   deleteAllClients
 } = require('../controllers/clientController');
 
 const protect = require('../middleware/authMiddleware');
