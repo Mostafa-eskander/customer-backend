@@ -38,6 +38,23 @@ exports.getAllTransactions = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// جلب كل معاملات عميل معين
+exports.getTransactionsByClientId = async (req, res) => {
+  try {
+    const clientId = req.params.clientId;
+
+    // تأكد إن المعاملات تابعة لنفس المستخدم
+    const transactions = await Transaction.find({
+      client: clientId,
+      user: req.user.id
+    }).populate('client', 'name'); // تجيب اسم العميل فقط
+
+    res.json(transactions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 // get by id
 exports.getTransactionById = async (req, res) => {
   try {
