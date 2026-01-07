@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.post('/', protect, createClient);
 router.get('/', protect, getClients);
-router.delete('/all', deleteAllClients);
+router.delete('/all', protect,deleteAllClients);
 router.get('/:id', protect, getClientById);
 router.put('/:id', protect, updateClient);
 router.delete('/:id', protect, deleteClient);

@@ -16,9 +16,10 @@ const router = express.Router();
 router.use(protect);
 
 router.post('/', createTransaction);
+router.delete('/all', deleteAllTransactions);
 router.get('/', getAllTransactions);
-router.get('/:id', getTransactionById);
 router.get('/client/:clientId', getTransactionsByClientId);
+router.get('/:id', getTransactionById);
 router.put('/:id', updateTransaction);
 router.delete('/:id', deleteTransaction);
 
