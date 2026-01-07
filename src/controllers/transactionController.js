@@ -112,3 +112,17 @@ exports.deleteTransaction = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// 🟢 حذف كل المعاملات الخاصة بالمستخدم
+exports.deleteAllTransactions = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // حذف كل المعاملات الخاصة بالمستخدم
+    await Transaction.deleteMany({ user: userId });
+
+    res.json({ message: 'تم حذف جميع المعاملات بنجاح' });
+  } catch (err) {
+    console.error('Error deleting all transactions:', err);
+    res.status(500).json({ message: 'حدث خطأ أثناء الحذف' });
+  }
+};
